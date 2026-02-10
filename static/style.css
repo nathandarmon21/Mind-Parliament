@@ -6,27 +6,27 @@
 }
 
 :root {
-    --bg: #0f1117;
-    --bg-surface: #1a1d27;
-    --bg-elevated: #232734;
-    --bg-hover: #2a2e3d;
-    --border: #2e3348;
-    --border-light: #3a3f54;
-    --text: #e4e6ef;
-    --text-muted: #8b8fa3;
-    --text-dim: #5d6178;
-    --accent: #7c6ef0;
-    --accent-hover: #9185f5;
-    --accent-dim: rgba(124, 110, 240, 0.15);
-    --green: #4ade80;
-    --green-dim: rgba(74, 222, 128, 0.15);
-    --amber: #fbbf24;
-    --amber-dim: rgba(251, 191, 36, 0.15);
-    --red: #f87171;
-    --blue: #60a5fa;
+    --bg: #f5f3f0;
+    --bg-surface: #ffffff;
+    --bg-elevated: #f0eee9;
+    --bg-hover: #e8e5df;
+    --border: #ddd8d0;
+    --border-light: #c9c3b8;
+    --text: #2c2825;
+    --text-muted: #6b6560;
+    --text-dim: #9a948d;
+    --accent: #6b5ce7;
+    --accent-hover: #5a4bd6;
+    --accent-dim: rgba(107, 92, 231, 0.1);
+    --green: #2d9d5e;
+    --green-dim: rgba(45, 157, 94, 0.1);
+    --amber: #c08a19;
+    --amber-dim: rgba(192, 138, 25, 0.1);
+    --red: #d94452;
+    --blue: #3b82c4;
     --radius: 10px;
     --radius-sm: 6px;
-    --shadow: 0 4px 24px rgba(0,0,0,0.3);
+    --shadow: 0 2px 12px rgba(0,0,0,0.06);
     --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
 }
@@ -166,7 +166,7 @@ textarea {
 select {
     cursor: pointer;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b8fa3' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6560' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
     padding-right: 2.5rem;
@@ -237,17 +237,17 @@ select {
 }
 
 /* Agent colors */
-.agent-color-0 { color: #7c6ef0; }
-.agent-color-1 { color: #4ade80; }
-.agent-color-2 { color: #fbbf24; }
-.agent-color-3 { color: #60a5fa; }
-.agent-color-4 { color: #f472b6; }
+.agent-color-0 { color: #6b5ce7; }
+.agent-color-1 { color: #2d9d5e; }
+.agent-color-2 { color: #c08a19; }
+.agent-color-3 { color: #3b82c4; }
+.agent-color-4 { color: #c4507a; }
 
-.bg-agent-0 { background: #7c6ef0; }
-.bg-agent-1 { background: #4ade80; }
-.bg-agent-2 { background: #fbbf24; }
-.bg-agent-3 { background: #60a5fa; }
-.bg-agent-4 { background: #f472b6; }
+.bg-agent-0 { background: #6b5ce7; }
+.bg-agent-1 { background: #2d9d5e; }
+.bg-agent-2 { background: #c08a19; }
+.bg-agent-3 { background: #3b82c4; }
+.bg-agent-4 { background: #c4507a; }
 
 /* ===== Buttons ===== */
 .btn {
@@ -591,7 +591,7 @@ select {
 }
 
 ::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--bg);
 }
 
 ::-webkit-scrollbar-thumb {

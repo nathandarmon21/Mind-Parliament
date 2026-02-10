@@ -8,7 +8,7 @@ const state = {
     debateTurns: [],
 };
 
-const AGENT_COLORS = ['#7c6ef0', '#4ade80', '#fbbf24', '#60a5fa', '#f472b6'];
+const AGENT_COLORS = ['#6b5ce7', '#2d9d5e', '#c08a19', '#3b82c4', '#c4507a'];
 
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', () => {
