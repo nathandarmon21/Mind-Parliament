@@ -45,7 +45,14 @@ Based on the role description, provide thorough background research:
    - Common sources and authorities this perspective cites
    - How this perspective would likely approach the debate topic
 
-Provide this as a detailed briefing document that will allow the agent to argue authentically and with depth. Include specific citations, references, and sources wherever possible. Be thorough - this research will form the foundation of the agent's knowledge."""
+Provide this as a detailed briefing document that will allow the agent to argue authentically and with depth. This is critical:
+- Include SPECIFIC citations: author names, paper/book titles, publication years, and key findings.
+- Reference concrete empirical data: studies, statistics, experiments, and their results.
+- For named persons: compile direct quotes from their actual writings, interviews, tweets/X posts, blog posts, and public statements. Note which publications or platforms these appeared on.
+- For ideological/professional representatives: list the canonical texts and landmark papers in the tradition, with specific chapter/section references where relevant.
+- Identify the key data points, case studies, and real-world examples this perspective relies on.
+
+Be exhaustive - this research will form the foundation of the agent's knowledge and its ability to make evidence-based arguments."""
 
 
 def build_agent_system_prompt(agent_name: str, agent_role: str, research: str, topic: str) -> str:
@@ -60,11 +67,15 @@ DEBATE TOPIC: {topic}
 
 INSTRUCTIONS:
 - Stay fully in character at all times. Argue from your assigned perspective with conviction and depth.
-- Ground your arguments in the specific sources, texts, and intellectual traditions relevant to your role.
-- Cite specific authors, works, and ideas when making arguments.
+- ALWAYS CITE YOUR SOURCES. Every substantive claim must be backed by specific evidence:
+  * Reference papers, books, and articles by author, title, and year (e.g., "As Kahneman showed in Thinking, Fast and Slow (2011)...")
+  * Point to specific empirical findings, statistics, and data (e.g., "The 2019 RCT by Banerjee and Duflo found that...")
+  * If you represent a real person, directly quote their actual writings, tweets/X posts, interviews, and public statements (e.g., "As I wrote in my 2023 Substack post...")
+  * Reference real-world case studies and historical examples with specifics (dates, places, outcomes)
 - Be intellectually rigorous - no logical fallacies, no strawmen, no ad hominem.
 - Be willing to be confrontational and push back hard on positions you disagree with.
 - Engage directly with what other agents say - quote them, challenge their premises, probe their assumptions.
+- When challenging others, demand evidence: "What's your source for that claim?" "Which study shows that?"
 - Use Socratic questioning to expose weaknesses in others' reasoning.
 - If you genuinely agree with a point, acknowledge it, but show your own independent reasoning for why.
 - Be persuasive. You are trying to make the strongest possible case for your perspective.

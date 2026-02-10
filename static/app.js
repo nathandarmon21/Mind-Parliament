@@ -22,13 +22,13 @@ function renderAgentConfigs(count) {
     const container = document.getElementById('agent-configs');
     container.innerHTML = '';
     for (let i = 0; i < count; i++) {
-        const defaultNames = ['Agent Alpha', 'Agent Beta', 'Agent Gamma', 'Agent Delta', 'Agent Epsilon'];
+        const placeholderNames = ['e.g. Seb Krier', 'e.g. Tyler Cowen', 'e.g. A Marxist Economist', 'e.g. FDA Regulator', 'e.g. Elon Musk'];
         const card = document.createElement('div');
         card.className = 'agent-config';
         card.innerHTML = `
             <div class="agent-config-header">
                 <div class="agent-color-dot bg-agent-${i}"></div>
-                <input type="text" id="agent-name-${i}" value="${defaultNames[i]}" placeholder="Agent name">
+                <input type="text" id="agent-name-${i}" value="" placeholder="${placeholderNames[i]}">
             </div>
             <div class="form-group" style="margin-bottom:0">
                 <label for="agent-role-${i}">Role Description</label>
