@@ -1,6 +1,7 @@
 """Mind Parliament - Multi-Agent Debate Server"""
 
 import json
+import time
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -9,6 +10,8 @@ from fastapi.staticfiles import StaticFiles
 from anthropic import AsyncAnthropic
 
 BASE_DIR = Path(__file__).resolve().parent
+SESSIONS_DIR = BASE_DIR / "sessions"
+SESSIONS_DIR.mkdir(exist_ok=True)
 
 app = FastAPI(title="Mind Parliament")
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
@@ -358,6 +361,113 @@ async def generate_consensus(request: Request):
             }) + "\n"
 
     return StreamingResponse(stream_consensus(), media_type="text/event-stream")
+
+
+@app.post("/api/sessions/save")
+async def save_session(request: Request):
+    data = await request.json()
+    session_id = str(int(time.time() * 1000))
+    session = {
+        "id": session_id,
+        "topic": data["topic"],
+        "model": data["model"],
+        "agents": data["agents"],
+        "transcript": data["transcript"],
+        "consensus": data.get("consensus"),
+        "follow_ups": data.get("follow_ups", []),
+        "created_at": time.strftime("%Y-%m-%d %H:%M"),
+    }
+    with open(SESSIONS_DIR / f"{session_id}.json", "w") as f:
+        json.dump(session, f)
+    return {"id": session_id}
+
+
+@app.post("/api/sessions/{session_id}/update")
+async def update_session(session_id: str, request: Request):
+    path = SESSIONS_DIR / f"{session_id}.json"
+    if not path.exists():
+        return {"error": "not found"}
+    data = await request.json()
+    with open(path) as f:
+        session = json.load(f)
+    session["follow_ups"] = data.get("follow_ups", session.get("follow_ups", []))
+    with open(path, "w") as f:
+        json.dump(session, f)
+    return {"ok": True}
+
+
+@app.get("/api/sessions")
+async def list_sessions():
+    sessions = []
+    for p in sorted(SESSIONS_DIR.glob("*.json"), reverse=True):
+        with open(p) as f:
+            s = json.load(f)
+        sessions.append({
+            "id": s["id"],
+            "topic": s["topic"],
+            "agents": [a["name"] for a in s["agents"]],
+            "created_at": s["created_at"],
+        })
+    return sessions
+
+
+@app.get("/api/sessions/{session_id}")
+async def get_session(session_id: str):
+    path = SESSIONS_DIR / f"{session_id}.json"
+    if not path.exists():
+        return {"error": "not found"}
+    with open(path) as f:
+        return json.load(f)
+
+
+@app.post("/api/followup")
+async def followup(request: Request):
+    data = await request.json()
+    agents = data["agents"]
+    topic = data["topic"]
+    transcript = data["transcript"]
+    user_message = data["message"]
+    follow_up_history = data.get("follow_up_history", [])
+    model = data.get("model", "claude-sonnet-4-5-20250514")
+
+    async def run_followup():
+        # Build context from prior follow-ups
+        prior_context = ""
+        for fu in follow_up_history:
+            prior_context += f"\nYou (user): {fu['user_message']}\n"
+            for resp in fu.get("responses", []):
+                prior_context += f"{resp['agent']}: {resp['text']}\n"
+
+        for agent in agents:
+            system = build_agent_system_prompt(
+                agent["name"], agent["role"], agent.get("research", ""), topic
+            )
+            prompt = f"""Here is the full debate transcript that already took place:
+
+{transcript}
+{prior_context}
+The user has now responded with a follow-up message directed at all participants:
+
+"{user_message}"
+
+Provide your brief take on what the user said (1-2 paragraphs). Stay in character. Respond directly to their point. Cite evidence where relevant."""
+
+            response = await client.messages.create(
+                model=model,
+                max_tokens=1024,
+                system=system,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            agent_text = response.content[0].text
+            yield json.dumps({
+                "type": "followup_response",
+                "agent": agent["name"],
+                "text": agent_text,
+            }) + "\n"
+
+        yield json.dumps({"type": "followup_complete"}) + "\n"
+
+    return StreamingResponse(run_followup(), media_type="text/event-stream")
 
 
 if __name__ == "__main__":

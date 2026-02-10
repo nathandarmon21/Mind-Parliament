@@ -46,6 +46,108 @@ body {
     padding: 0 1.5rem 4rem;
 }
 
+/* ===== Sidebar ===== */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -320px;
+    width: 320px;
+    height: 100vh;
+    background: var(--bg-surface);
+    border-right: 1px solid var(--border);
+    z-index: 1000;
+    transition: left 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow);
+}
+
+.sidebar.open {
+    left: 0;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.sidebar-header h3 {
+    font-size: 1rem;
+    font-weight: 650;
+}
+
+.sidebar-close {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0 0.25rem;
+    line-height: 1;
+}
+
+.sidebar-close:hover {
+    color: var(--text);
+}
+
+.session-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+
+.session-list-empty {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+.session-item {
+    padding: 0.75rem 0.85rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-bottom: 0.25rem;
+}
+
+.session-item:hover {
+    background: var(--bg-elevated);
+}
+
+.session-item-topic {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+    line-height: 1.35;
+}
+
+.session-item-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.2);
+    z-index: 999;
+    display: none;
+}
+
+.sidebar-overlay.open {
+    display: block;
+}
+
 /* ===== Header ===== */
 .header {
     padding: 2.5rem 0 2rem;
@@ -55,6 +157,31 @@ body {
 
 .header-content {
     text-align: center;
+}
+
+.header-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.btn-icon:hover {
+    border-color: var(--border-light);
+    color: var(--text);
+    background: var(--bg-elevated);
 }
 
 .logo {
@@ -786,6 +913,98 @@ select {
 
 .source-relevance {
     font-style: italic;
+}
+
+/* ===== Follow-up Chat ===== */
+.followup-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 600px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+}
+
+.followup-user {
+    background: var(--accent-dim);
+    border: 1px solid rgba(107, 92, 231, 0.2);
+    border-radius: var(--radius);
+    padding: 0.85rem 1.15rem;
+}
+
+.followup-user-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+}
+
+.followup-user-text {
+    font-size: 0.9rem;
+    color: var(--text);
+    line-height: 1.6;
+}
+
+.followup-agent {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.85rem 1.15rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.followup-agent-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.4rem;
+}
+
+.followup-agent-header strong {
+    font-size: 0.88rem;
+}
+
+.followup-agent-text {
+    font-size: 0.87rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+}
+
+.followup-agent-text p {
+    margin-bottom: 0.5rem;
+}
+
+.followup-agent-text p:last-child {
+    margin-bottom: 0;
+}
+
+.followup-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+}
+
+.followup-input-area {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-end;
+}
+
+.followup-input-area textarea {
+    flex: 1;
+    min-height: 44px;
+    max-height: 120px;
+    resize: vertical;
+}
+
+.followup-input-area .btn {
+    flex-shrink: 0;
+    height: 44px;
 }
 
 /* ===== Scrollbar ===== */
