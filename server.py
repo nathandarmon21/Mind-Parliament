@@ -104,7 +104,7 @@ When you believe the debate has reached a stable end state, end your message wit
 
 def build_consensus_prompt(topic: str, agent_descriptions: list[dict], transcript: str) -> str:
     agents_text = "\n".join([f"- {a['name']}: {a['role']}" for a in agent_descriptions])
-    return f"""You have just observed a full parliamentary debate in the Mind Parliament. Your task is to produce the final consensus deliberation.
+    return f"""You have just observed a full parliamentary debate in the Mind Parliament. Your task is to produce the final consensus deliberation as a JSON object.
 
 TOPIC: {topic}
 
@@ -114,21 +114,59 @@ PARTICIPANTS:
 FULL DEBATE TRANSCRIPT:
 {transcript}
 
-Produce a comprehensive final deliberation that:
+You MUST respond with valid JSON and nothing else. Use this exact structure:
 
-1. **Core Question**: Restate what was being debated and why it matters.
+{{
+  "summary": "A 2-3 paragraph synthesis that directly answers the original question, integrating the strongest insights. Take a substantive position — do not be wishy-washy. If genuine consensus is impossible, explain exactly why.",
 
-2. **Key Positions**: Summarize each agent's core position and their strongest arguments. Note which arguments were most compelling and why.
+  "key_arguments": [
+    {{
+      "agent": "Agent Name",
+      "position": "One-sentence summary of their core position",
+      "strongest_argument": "The single most compelling argument this agent made (2-3 sentences)",
+      "direct_quote": "Copy-paste an exact passage from this agent's debate turns that best captures their key point. This must be a real quote from the transcript above."
+    }}
+  ],
 
-3. **Critical Tensions**: Identify the fundamental disagreements that emerged. Where do the perspectives genuinely conflict, and where were apparent disagreements actually about different things?
+  "tensions": [
+    {{
+      "description": "One-sentence description of the fundamental disagreement",
+      "sides": [
+        {{
+          "agent": "Agent Name",
+          "stance": "Their position on this tension (1-2 sentences)",
+          "direct_quote": "Copy-paste an exact passage from their debate turns on this point."
+        }}
+      ]
+    }}
+  ],
 
-4. **Points of Convergence**: Where did agents agree, either explicitly or implicitly? What shared assumptions or conclusions emerged?
+  "convergence": "Where did agents agree, either explicitly or implicitly? What shared assumptions or conclusions emerged? (1-2 paragraphs)",
 
-5. **Synthesis / Consensus Position**: Provide the most well-reasoned answer to the original question that holds the tensions of the different perspectives. This should not be a wishy-washy "both sides have points" - take a substantive position that integrates the strongest insights from the debate. If genuine consensus is impossible, explain exactly why and what the irreducible disagreements are.
+  "key_takeaways": [
+    "Takeaway 1: a concrete, information-dense insight",
+    "Takeaway 2: ...",
+    "Takeaway 3: ..."
+  ],
 
-6. **Key Takeaways**: The 3-5 most important insights or conclusions from the debate that the reader should walk away with.
+  "sources_cited": [
+    {{
+      "title": "Title of paper, book, article, or post",
+      "author": "Author name(s)",
+      "year": "Year if known, or empty string",
+      "cited_by": "Which agent cited this",
+      "relevance": "One sentence on why this source matters to the debate"
+    }}
+  ]
+}}
 
-Be information-dense. Every sentence should carry weight. Cite specific arguments and moments from the debate."""
+IMPORTANT:
+- The "direct_quote" fields must be EXACT text copied from the transcript — do not paraphrase.
+- The "sources_cited" should include ALL papers, books, articles, studies, blog posts, tweets, and other references that were mentioned during the debate.
+- Include 3-5 key_takeaways.
+- Include one entry in key_arguments for each participant (not the Moderator).
+- Include 2-4 tensions.
+- Respond with ONLY the JSON object, no markdown code fences, no extra text."""
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -297,12 +335,27 @@ async def generate_consensus(request: Request):
             max_tokens=8192,
             messages=[{"role": "user", "content": prompt}],
         )
-        consensus_text = response.content[0].text
+        raw_text = response.content[0].text
 
-        yield json.dumps({
-            "type": "consensus_complete",
-            "consensus": consensus_text,
-        }) + "\n"
+        # Try to parse as structured JSON; fall back to plain text
+        try:
+            # Strip markdown code fences if present
+            cleaned = raw_text.strip()
+            if cleaned.startswith("```"):
+                cleaned = cleaned.split("\n", 1)[1]
+                cleaned = cleaned.rsplit("```", 1)[0]
+            consensus_data = json.loads(cleaned)
+            yield json.dumps({
+                "type": "consensus_complete",
+                "structured": True,
+                "data": consensus_data,
+            }) + "\n"
+        except (json.JSONDecodeError, KeyError):
+            yield json.dumps({
+                "type": "consensus_complete",
+                "structured": False,
+                "consensus": raw_text,
+            }) + "\n"
 
     return StreamingResponse(stream_consensus(), media_type="text/event-stream")
 

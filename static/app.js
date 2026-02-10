@@ -309,13 +309,144 @@ async function runConsensus() {
             try {
                 const event = JSON.parse(line);
                 if (event.type === 'consensus_complete') {
-                    container.innerHTML = renderMarkdown(event.consensus);
+                    if (event.structured) {
+                        container.innerHTML = renderStructuredConsensus(event.data);
+                    } else {
+                        container.innerHTML = renderMarkdown(event.consensus);
+                    }
                 }
             } catch (e) {
                 // skip
             }
         }
     }
+}
+
+function getAgentColor(agentName) {
+    const idx = state.agents.findIndex(a => a.name === agentName);
+    return idx >= 0 ? AGENT_COLORS[idx] : 'var(--text)';
+}
+
+function renderStructuredConsensus(data) {
+    let html = '';
+
+    // Summary
+    html += `<div class="consensus-section">
+        <h2>Synthesis</h2>
+        <p>${escapeHtml(data.summary)}</p>
+    </div>`;
+
+    // Key Arguments (expandable)
+    html += `<div class="consensus-section">
+        <h2>Strongest Arguments</h2>
+        <div class="expandable-list">`;
+
+    for (const arg of (data.key_arguments || [])) {
+        const color = getAgentColor(arg.agent);
+        const id = 'arg-' + Math.random().toString(36).substr(2, 9);
+        html += `
+        <div class="expandable-card">
+            <div class="expandable-header" onclick="toggleExpandable('${id}')">
+                <div class="expandable-header-left">
+                    <div class="agent-color-dot" style="background:${color}"></div>
+                    <strong style="color:${color}">${escapeHtml(arg.agent)}</strong>
+                    <span class="expandable-summary">${escapeHtml(arg.position)}</span>
+                </div>
+                <span class="expand-arrow" id="arrow-${id}">&#9654;</span>
+            </div>
+            <div class="expandable-body" id="${id}" style="display:none;">
+                <div class="expandable-argument">
+                    <div class="expandable-label">Strongest Argument</div>
+                    <p>${escapeHtml(arg.strongest_argument)}</p>
+                </div>
+                <div class="expandable-quote">
+                    <div class="expandable-label">Direct Quote from Debate</div>
+                    <blockquote>${escapeHtml(arg.direct_quote)}</blockquote>
+                </div>
+            </div>
+        </div>`;
+    }
+    html += `</div></div>`;
+
+    // Tensions (expandable)
+    html += `<div class="consensus-section">
+        <h2>Key Tensions</h2>
+        <div class="expandable-list">`;
+
+    for (const tension of (data.tensions || [])) {
+        const id = 'tension-' + Math.random().toString(36).substr(2, 9);
+        html += `
+        <div class="expandable-card">
+            <div class="expandable-header" onclick="toggleExpandable('${id}')">
+                <div class="expandable-header-left">
+                    <strong>${escapeHtml(tension.description)}</strong>
+                </div>
+                <span class="expand-arrow" id="arrow-${id}">&#9654;</span>
+            </div>
+            <div class="expandable-body" id="${id}" style="display:none;">`;
+
+        for (const side of (tension.sides || [])) {
+            const color = getAgentColor(side.agent);
+            html += `
+                <div class="tension-side">
+                    <div class="tension-side-header">
+                        <div class="agent-color-dot" style="background:${color}"></div>
+                        <strong style="color:${color}">${escapeHtml(side.agent)}</strong>
+                    </div>
+                    <p>${escapeHtml(side.stance)}</p>
+                    <blockquote>${escapeHtml(side.direct_quote)}</blockquote>
+                </div>`;
+        }
+        html += `</div></div>`;
+    }
+    html += `</div></div>`;
+
+    // Convergence
+    if (data.convergence) {
+        html += `<div class="consensus-section">
+            <h2>Points of Convergence</h2>
+            <p>${escapeHtml(data.convergence)}</p>
+        </div>`;
+    }
+
+    // Key Takeaways
+    html += `<div class="consensus-section">
+        <h2>Key Takeaways</h2>
+        <ol class="takeaways-list">`;
+    for (const takeaway of (data.key_takeaways || [])) {
+        html += `<li>${escapeHtml(takeaway)}</li>`;
+    }
+    html += `</ol></div>`;
+
+    // Sources Cited
+    if (data.sources_cited && data.sources_cited.length > 0) {
+        html += `<div class="consensus-section sources-section">
+            <h2>Sources Cited in the Debate</h2>
+            <div class="sources-list">`;
+        for (const src of data.sources_cited) {
+            const citedByColor = getAgentColor(src.cited_by);
+            html += `
+            <div class="source-item">
+                <div class="source-title">${escapeHtml(src.title)}${src.year ? ' (' + escapeHtml(src.year) + ')' : ''}</div>
+                <div class="source-author">${escapeHtml(src.author)}</div>
+                <div class="source-meta">
+                    <span class="source-cited-by">Cited by <strong style="color:${citedByColor}">${escapeHtml(src.cited_by)}</strong></span>
+                    <span class="source-relevance">${escapeHtml(src.relevance)}</span>
+                </div>
+            </div>`;
+        }
+        html += `</div></div>`;
+    }
+
+    return html;
+}
+
+function toggleExpandable(id) {
+    const body = document.getElementById(id);
+    const arrow = document.getElementById('arrow-' + id);
+    const isOpen = body.style.display !== 'none';
+    body.style.display = isOpen ? 'none' : 'block';
+    arrow.classList.toggle('expanded', !isOpen);
 }
 
 // ===== Transcript Toggle =====
