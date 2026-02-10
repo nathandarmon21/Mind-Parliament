@@ -16,9 +16,8 @@ app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="stat
 client = AsyncAnthropic()
 
 AVAILABLE_MODELS = [
-    {"id": "claude-opus-4-20250514", "name": "Claude Opus 4"},
-    {"id": "claude-sonnet-4-20250514", "name": "Claude Sonnet 4"},
-    {"id": "claude-haiku-3-5-20241022", "name": "Claude 3.5 Haiku"},
+    {"id": "claude-opus-4-20250514", "name": "Claude Opus 4.6"},
+    {"id": "claude-sonnet-4-5-20250514", "name": "Claude Sonnet 4.5"},
 ]
 
 
@@ -137,7 +136,7 @@ async def research_agents(request: Request):
     data = await request.json()
     agents = data["agents"]
     topic = data["topic"]
-    model = data.get("model", "claude-sonnet-4-20250514")
+    model = data.get("model", "claude-sonnet-4-5-20250514")
 
     async def run_research():
         results = {}
@@ -168,7 +167,7 @@ async def run_debate(request: Request):
     data = await request.json()
     agents = data["agents"]  # [{name, role, research}, ...]
     topic = data["topic"]
-    model = data.get("model", "claude-sonnet-4-20250514")
+    model = data.get("model", "claude-sonnet-4-5-20250514")
 
     agent_system_prompts = {}
     for agent in agents:
@@ -275,7 +274,7 @@ async def generate_consensus(request: Request):
     agents = data["agents"]
     topic = data["topic"]
     transcript = data["transcript"]
-    model = data.get("model", "claude-sonnet-4-20250514")
+    model = data.get("model", "claude-sonnet-4-5-20250514")
 
     prompt = build_consensus_prompt(topic, agents, transcript)
 
